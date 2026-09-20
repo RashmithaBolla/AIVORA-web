@@ -248,7 +248,7 @@ const teamData = {
     },
     {
       id: 'mkt-lead-2',
-      name: 'Y. Spandana',
+      name: 'Ch. Akshara',
       year: '3rd Year',
       department: DEPT,
       image: '/images/team/mkt-lead-2.jpg',
@@ -256,7 +256,7 @@ const teamData = {
     },
     {
       id: 'mkt-lead-3',
-      name: 'Ch. Akshara',
+      name: 'Y. Spandana',
       year: '3rd Year',
       department: DEPT,
       image: '/images/team/mkt-lead-3.jpg',
