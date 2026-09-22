@@ -1,4 +1,6 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
 import TeamMember from '../components/TeamMember';
 
 // Team member interface for type safety
@@ -544,9 +546,68 @@ const teamSections = [
   { key: 'documentationTeam', title: 'Documentation', members: teamData.documentationTeam },
 ];
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Lightbox component (inline — small enough not to warrant its own file)
+// ─────────────────────────────────────────────────────────────────────────────
+interface LightboxProps {
+  src: string;
+  caption?: string;
+  onClose: () => void;
+}
+
+function Lightbox({ src, caption, onClose }: LightboxProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 text-white/70 hover:text-white p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+        aria-label="Close"
+      >
+        <X size={20} />
+      </button>
+      <motion.div
+        initial={{ scale: 0.85, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.85, opacity: 0 }}
+        transition={{ type: 'spring', damping: 20 }}
+        className="max-w-4xl max-h-[90vh] flex flex-col items-center gap-3"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img
+          src={src}
+          alt={caption ?? 'Event photo'}
+          className="max-h-[80vh] max-w-full rounded-xl object-contain shadow-2xl"
+        />
+        {caption && (
+          <p className="text-white/60 text-sm text-center">{caption}</p>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export default function AboutUs() {
+  const [lightbox, setLightbox] = useState<{ src: string; caption?: string } | null>(null);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-purple-950/20 to-black">
+      {/* Lightbox */}
+      <AnimatePresence>
+        {lightbox && (
+          <Lightbox
+            src={lightbox.src}
+            caption={lightbox.caption}
+            onClose={() => setLightbox(null)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Hero Section */}
       <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
@@ -639,12 +700,13 @@ export default function AboutUs() {
 
       {/* Club Information Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 border-t border-white/10">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
+            className="text-center mb-10"
           >
             <h2 className="text-4xl font-bold mb-8">
               <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
@@ -662,6 +724,38 @@ export default function AboutUs() {
                 to the rapidly evolving field of AI while building lasting connections and professional skills.
               </p>
             </div>
+          </motion.div>
+
+          {/* Club Launch Images */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8"
+          >
+            {[
+              { src: '/images/events/club-launch-1.jpg', caption: 'AIVORA Club Launch' },
+              { src: '/images/events/club-launch-2.jpeg', caption: 'AIVORA Club Launch' },
+            ].map((img, i) => (
+              <motion.button
+                key={i}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setLightbox({ src: img.src, caption: img.caption })}
+                className="group relative aspect-video rounded-2xl overflow-hidden border border-white/10 hover:border-purple-500/50 transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <img
+                  src={img.src}
+                  alt={img.caption}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <p className="text-white text-sm font-medium">{img.caption}</p>
+                </div>
+                <div className="absolute inset-0 bg-purple-500/0 group-hover:bg-purple-500/10 transition-colors duration-300 pointer-events-none" />
+              </motion.button>
+            ))}
           </motion.div>
         </div>
       </section>
